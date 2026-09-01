@@ -7,10 +7,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Race {
 
+    private final String id;
     private final int durationInSeconds;
-
+    private final RaceStatus raceStatus;
     public enum RaceStatus {
-        PENDING, STARTED,  FINISHED
+        CREATED, ACTIVE, FINISHED
     }
 }
 

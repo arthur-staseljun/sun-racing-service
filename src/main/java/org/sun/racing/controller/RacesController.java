@@ -1,8 +1,6 @@
 package org.sun.racing.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.Errors;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,21 +18,13 @@ public class RacesController {
     private final RaceService raceService;
 
     @PostMapping
-    public Race createRace(@Validated @RequestBody CreateRaceRequest request, Errors errors) {
-        validateCreateRaceRequestParams(request);
-        int duration = Integer.parseInt(request.getDurationInSeconds());
-        return new Race(duration);
-    }
-
-    private static void validateCreateRaceRequestParams(CreateRaceRequest request) {
+    public Race createRace(@RequestBody CreateRaceRequest request) {
         int duration;
         try {
             duration = Integer.parseInt(request.getDurationInSeconds());
         } catch (NumberFormatException e) {
             throw new RaceDurationValidationException();
         }
-        if (duration < 1 || duration > 3600) {
-            throw new RaceDurationValidationException();
-        }
+        return raceService.createNewRace(duration);
     }
 }
