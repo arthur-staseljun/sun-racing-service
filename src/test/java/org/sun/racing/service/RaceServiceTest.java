@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.sun.racing.exception.RaceDurationValidationException;
 import org.sun.racing.model.Race;
-import org.sun.racing.persistance.RaceEntity;
-import org.sun.racing.repository.RaceRepository;
+import org.sun.racing.persistance.entity.RaceEntity;
+import org.sun.racing.persistance.RaceRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,7 +28,7 @@ class RaceServiceTest {
 
     @Test
     void createRaceWithMinDuration() {
-        when(raceRepository.saveAndFlush(any(RaceEntity.class))).thenReturn(new RaceEntity(1, Race.RaceStatus.CREATED));
+        when(raceRepository.save(any(RaceEntity.class))).thenReturn(new RaceEntity(1, Race.RaceStatus.CREATED));
         Race newRace = raceService.createNewRace(1);
         assertEquals(Race.RaceStatus.CREATED, newRace.getRaceStatus());
         assertEquals(1, newRace.getDurationInSeconds());
@@ -36,7 +36,7 @@ class RaceServiceTest {
 
     @Test
     void createRaceWithMaxDuration() {
-        when(raceRepository.saveAndFlush(any(RaceEntity.class))).thenReturn(new RaceEntity(3600, Race.RaceStatus.CREATED));
+        when(raceRepository.save(any(RaceEntity.class))).thenReturn(new RaceEntity(3600, Race.RaceStatus.CREATED));
         Race newRace = raceService.createNewRace(3600);
         assertEquals(Race.RaceStatus.CREATED, newRace.getRaceStatus());
         assertEquals(3600, newRace.getDurationInSeconds());

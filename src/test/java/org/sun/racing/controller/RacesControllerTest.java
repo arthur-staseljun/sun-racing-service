@@ -8,6 +8,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.sun.racing.model.Race;
 import org.sun.racing.service.RaceService;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -24,7 +26,7 @@ class RacesControllerTest {
 
     @Test
     void testCreateRace() throws Exception {
-        when(raceService.createNewRace(anyInt())).thenReturn(new Race("ABC", 100, Race.RaceStatus.CREATED));
+        when(raceService.createNewRace(anyInt())).thenReturn(new Race(UUID.randomUUID(), 100, Race.RaceStatus.CREATED));
         mockMvc.perform(post("/races")
                         .contentType(APPLICATION_JSON)
                         .content("{\"durationInSeconds\":100}"))
@@ -41,21 +43,21 @@ class RacesControllerTest {
                         .content("{\"durationInSeconds\":\"abc\"}"))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Race duration shall be integer between 1 and 3600 seconds"));
+                .andExpect(jsonPath("$.errorMessage").value("Race duration shall be integer between 1 and 3600 seconds"));
 
         mockMvc.perform(post("/races")
                         .contentType(APPLICATION_JSON)
                         .content("{\"something\":\"abc\"}"))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Race duration shall be integer between 1 and 3600 seconds"));
+                .andExpect(jsonPath("$.errorMessage").value("Race duration shall be integer between 1 and 3600 seconds"));
 
         mockMvc.perform(post("/races")
                         .contentType(APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Race duration shall be integer between 1 and 3600 seconds"));
+                .andExpect(jsonPath("$.errorMessage").value("Race duration shall be integer between 1 and 3600 seconds"));
     }
 
 
