@@ -6,7 +6,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.sun.racing.model.Race;
-import org.sun.racing.service.RaceService;
+import org.sun.racing.service.RacingTransactionalService;
 
 import java.util.UUID;
 
@@ -22,11 +22,11 @@ class RacesControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockitoBean
-    private RaceService raceService;
+    private RacingTransactionalService racingTransactionalService;
 
     @Test
     void testCreateRace() throws Exception {
-        when(raceService.createNewRace(anyInt())).thenReturn(new Race(UUID.randomUUID(), 100, Race.RaceStatus.CREATED));
+        when(racingTransactionalService.createNewRace(anyInt())).thenReturn(new Race(UUID.randomUUID(), 100, Race.RaceStatus.CREATED));
         mockMvc.perform(post("/races")
                         .contentType(APPLICATION_JSON)
                         .content("{\"durationInSeconds\":100}"))

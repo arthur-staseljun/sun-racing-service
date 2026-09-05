@@ -1,0 +1,57 @@
+package org.sun.racing.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.sun.racing.exception.ParticipantAlreadyJoinedException;
+import org.sun.racing.exception.RaceDoesNotExist;
+import org.sun.racing.exception.RaceDurationValidationException;
+import org.sun.racing.exception.RaceIsActiveOrFinished;
+import org.sun.racing.model.Race;
+import org.sun.racing.model.response.ParticipationInfoResponse;
+import org.sun.racing.persistance.ParticipationRepository;
+import org.sun.racing.persistance.entity.ParticipationEntity;
+import org.sun.racing.persistance.entity.RaceEntity;
+import org.sun.racing.persistance.RaceRepository;
+
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class RacingTransactionalService {
+
+    private final RaceRepository raceRepository;
+    private final ParticipationRepository participationRepository;
+
+    @Transactional
+    public Race createNewRace(int duration) {
+        if (duration < 1 || duration > 3600) {
+            throw new RaceDurationValidationException();
+        }
+        RaceEntity raceEntity = new RaceEntity(duration, Race.RaceStatus.CREATED);
+        RaceEntity saved = raceRepository.save(raceEntity);
+        return new Race(saved.getId(), saved.getDurationInSeconds(), saved.getRaceStatus());
+    }
+
+    @Transactional
+    public ParticipationInfoResponse joinRace(UUID raceId, String participantId) {
+        var optionalRace = raceRepository.findById(raceId);
+        if (optionalRace.isEmpty()) {
+            throw new RaceDoesNotExist();
+        }
+        RaceEntity race = optionalRace.get();
+        if (!Race.RaceStatus.CREATED.equals(race.getRaceStatus())) {
+            throw new RaceIsActiveOrFinished();
+        }
+
+        var optionalParticipation = participationRepository.getByRaceIdAndParticipantId(race.getId(), participantId);
+        if (optionalParticipation.isPresent()) {
+            throw new ParticipantAlreadyJoinedException();
+        }
+
+        ParticipationEntity participationEntity = new ParticipationEntity(participantId, race.getId());
+        var saved = participationRepository.save(participationEntity);
+        return new ParticipationInfoResponse(
+                saved.getRaceId(), saved.getParticipantId(), saved.getCreatedAt());
+    }
+}

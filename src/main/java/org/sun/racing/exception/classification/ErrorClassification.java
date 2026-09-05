@@ -9,7 +9,10 @@ import java.io.Serializable;
 @RequiredArgsConstructor
 public enum ErrorClassification implements ErrorClassifier, Serializable {
     RACE_DURATION_PARSE_ERROR("rc-dv-01", "Race duration shall be integer between 1 and 3600 seconds"),
-    RACER_ID_PARSE_ERROR("rc-id-01", "Exception while parsing raceId");
+    RACER_ID_PARSE_ERROR("rc-id-01", "Exception while parsing raceId"),
+    PARTICIPANT_ALREADY_JOINED("reg-ex-01", "Participant already joined"),
+    RACE_DOES_NOT_EXIST("reg-ex-02", "Race doesn't exist" ),
+    RACE_IS_ACTIVE_OR_ALREADY_FINISHED("reg-ex-03", "Race is active or already finished" ),;
     private static final long serialVersionUID = -6849794470754667710L;
 
     private final String errorCode;
