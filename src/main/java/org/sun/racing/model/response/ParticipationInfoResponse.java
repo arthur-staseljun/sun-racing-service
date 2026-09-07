@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import static org.sun.racing.util.Constant.DATETIME_FORMAT;
+import static org.sun.racing.util.Utils.DATETIME_FORMAT;
 
 @Getter
 @AllArgsConstructor

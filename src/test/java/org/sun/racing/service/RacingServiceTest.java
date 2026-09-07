@@ -17,22 +17,25 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class RacingTransactionalServiceTest {
+class RacingServiceTest {
     @Mock
     private RaceRepository raceRepository;
     @Mock
     private ParticipationRepository participationRepository;
-    private RacingTransactionalService racingTransactionalService;
+    @Mock
+    private RaceExecutor raceExecutor;
+
+    private RacingService racingService;
 
     @BeforeEach
     void setUp() {
-        racingTransactionalService = new RacingTransactionalService(raceRepository, participationRepository);
+        racingService = new RacingService(raceRepository, participationRepository, raceExecutor);
     }
 
     @Test
     void createRaceWithMinDuration() {
         when(raceRepository.save(any(RaceEntity.class))).thenReturn(new RaceEntity(1, Race.RaceStatus.CREATED));
-        Race newRace = racingTransactionalService.createNewRace(1);
+        Race newRace = racingService.createNewRace(1);
         assertEquals(Race.RaceStatus.CREATED, newRace.getRaceStatus());
         assertEquals(1, newRace.getDurationInSeconds());
     }
@@ -40,15 +43,15 @@ class RacingTransactionalServiceTest {
     @Test
     void createRaceWithMaxDuration() {
         when(raceRepository.save(any(RaceEntity.class))).thenReturn(new RaceEntity(3600, Race.RaceStatus.CREATED));
-        Race newRace = racingTransactionalService.createNewRace(3600);
+        Race newRace = racingService.createNewRace(3600);
         assertEquals(Race.RaceStatus.CREATED, newRace.getRaceStatus());
         assertEquals(3600, newRace.getDurationInSeconds());
     }
 
     @Test
     void testInvalidRaceDuration() {
-        assertThrows(RaceDurationValidationException.class, () -> racingTransactionalService.createNewRace(0));
-        assertThrows(RaceDurationValidationException.class, () -> racingTransactionalService.createNewRace(-1));
-        assertThrows(RaceDurationValidationException.class, () -> racingTransactionalService.createNewRace(3601));
+        assertThrows(RaceDurationValidationException.class, () -> racingService.createNewRace(0));
+        assertThrows(RaceDurationValidationException.class, () -> racingService.createNewRace(-1));
+        assertThrows(RaceDurationValidationException.class, () -> racingService.createNewRace(3601));
     }
 }

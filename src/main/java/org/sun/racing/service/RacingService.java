@@ -9,21 +9,25 @@ import org.sun.racing.exception.RaceDurationValidationException;
 import org.sun.racing.exception.RaceIsActiveOrFinished;
 import org.sun.racing.model.Race;
 import org.sun.racing.model.response.ParticipationInfoResponse;
+import org.sun.racing.model.response.RaceInfoResponse;
 import org.sun.racing.persistance.ParticipationRepository;
+import org.sun.racing.persistance.RaceRepository;
 import org.sun.racing.persistance.entity.ParticipationEntity;
 import org.sun.racing.persistance.entity.RaceEntity;
-import org.sun.racing.persistance.RaceRepository;
 
+import java.util.List;
 import java.util.UUID;
+
+import static org.sun.racing.util.Utils.getCurrentDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class RacingTransactionalService {
+public class RacingService {
 
     private final RaceRepository raceRepository;
     private final ParticipationRepository participationRepository;
+    private final RaceExecutor raceExecutor;
 
-    @Transactional
     public Race createNewRace(int duration) {
         if (duration < 1 || duration > 3600) {
             throw new RaceDurationValidationException();
@@ -35,7 +39,7 @@ public class RacingTransactionalService {
 
     @Transactional
     public ParticipationInfoResponse joinRace(UUID raceId, String participantId) {
-        var optionalRace = raceRepository.findById(raceId);
+        var optionalRace = raceRepository.findByRaceId(raceId);
         if (optionalRace.isEmpty()) {
             throw new RaceDoesNotExist();
         }
@@ -53,5 +57,33 @@ public class RacingTransactionalService {
         var saved = participationRepository.save(participationEntity);
         return new ParticipationInfoResponse(
                 saved.getRaceId(), saved.getParticipantId(), saved.getCreatedAt());
+    }
+
+    @Transactional
+    public Race startRace(UUID raceId) {
+        var optionalRace = raceRepository.findByRaceId(raceId);
+        if (optionalRace.isEmpty()) {
+            throw new RaceDoesNotExist();
+        }
+        RaceEntity race = optionalRace.get();
+        if (!Race.RaceStatus.CREATED.equals(race.getRaceStatus())) {
+            throw new RaceIsActiveOrFinished();
+        }
+        race.setRaceStatus(Race.RaceStatus.ACTIVE);
+        race.setStartedAt(getCurrentDateTime());
+        race.setUpdatedAt(getCurrentDateTime());
+        RaceEntity saved = raceRepository.save(race);
+        raceExecutor.runRace(race.getId(), race.getDurationInSeconds());
+        return new Race(saved.getId(), saved.getDurationInSeconds(), saved.getRaceStatus());
+    }
+
+    public RaceInfoResponse getRaceInfo(UUID raceId) {
+        var optionalRace = raceRepository.findById(raceId);
+        if (optionalRace.isEmpty()) {
+            throw new RaceDoesNotExist();
+        }
+        RaceEntity race = optionalRace.get();
+        List<ParticipationEntity> participationEntities = participationRepository.getByRaceId(raceId);
+        return new RaceInfoResponse(race, participationEntities);
     }
 }

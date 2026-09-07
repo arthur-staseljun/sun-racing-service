@@ -1,6 +1,9 @@
 create table participations (
+    id              serial,
     race_id         uuid,
     participant_id  varchar(255),
+    score           smallint,
     created_at      timestamp,
-    primary key (race_id)
+    updated_at      timestamp,
+    primary key (id)
 );
