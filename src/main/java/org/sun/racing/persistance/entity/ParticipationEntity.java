@@ -3,6 +3,7 @@ package org.sun.racing.persistance.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -19,12 +20,16 @@ public class ParticipationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    private Long version;
+
     @Column(name = "race_id")
     private UUID raceId;
 
     @Column(name = "participant_id")
     private String participantId;
 
+    @Setter
     private Integer score;
 
     @Column(name = "created_at")

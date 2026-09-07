@@ -72,7 +72,8 @@ public class RacingService {
         race.setRaceStatus(Race.RaceStatus.ACTIVE);
         race.setStartedAt(getCurrentDateTime());
         race.setUpdatedAt(getCurrentDateTime());
-        RaceEntity saved = raceRepository.save(race);
+        RaceEntity saved = raceRepository.saveAndFlush(race);
+
         raceExecutor.runRace(race.getId(), race.getDurationInSeconds());
         return new Race(saved.getId(), saved.getDurationInSeconds(), saved.getRaceStatus());
     }

@@ -20,9 +20,6 @@ public class RaceExecutor {
 
     private final RaceRepository raceRepository;
 
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-
     public void runRace(UUID raceId, int durationInSeconds) {
         Runnable race = () -> {
             RaceEntity raceEntity = raceRepository.findById(raceId)
@@ -30,12 +27,15 @@ public class RaceExecutor {
             raceEntity.setFinishedAt(getCurrentDateTime());
             raceEntity.setUpdatedAt(getCurrentDateTime());
             raceEntity.setRaceStatus(Race.RaceStatus.FINISHED);
-            raceRepository.save(raceEntity);
+            raceRepository.saveAndFlush(raceEntity);
         };
-        schedule(race, durationInSeconds, TimeUnit.SECONDS);
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+        schedule(scheduler, executor, race, durationInSeconds, TimeUnit.SECONDS);
     }
 
-    private void schedule(Runnable command, long delay, TimeUnit unit) {
+    private void schedule(ScheduledExecutorService scheduler, ExecutorService executor,
+                          Runnable command, long delay, TimeUnit unit) {
         scheduler.schedule(() -> executor.execute(command), delay, unit);
     }
 }

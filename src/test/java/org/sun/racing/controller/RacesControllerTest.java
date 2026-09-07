@@ -6,6 +6,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.sun.racing.model.Race;
+import org.sun.racing.service.DriveService;
 import org.sun.racing.service.RacingService;
 
 import java.util.UUID;
@@ -23,6 +24,8 @@ class RacesControllerTest {
     private MockMvc mockMvc;
     @MockitoBean
     private RacingService racingService;
+    @MockitoBean
+    private DriveService driveService;
 
     @Test
     void testCreateRace() throws Exception {
