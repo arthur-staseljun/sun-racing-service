@@ -26,7 +26,7 @@ public class RacingService {
 
     private final RaceRepository raceRepository;
     private final ParticipationRepository participationRepository;
-    private final RaceExecutor raceExecutor;
+    private final Scheduler scheduler;
 
     public Race createNewRace(int duration) {
         if (duration < 1 || duration > 3600) {
@@ -37,9 +37,8 @@ public class RacingService {
         return new Race(saved.getId(), saved.getDurationInSeconds(), saved.getRaceStatus());
     }
 
-    @Transactional
     public ParticipationInfoResponse joinRace(UUID raceId, String participantId) {
-        var optionalRace = raceRepository.findByRaceId(raceId);
+        var optionalRace = raceRepository.findById(raceId);
         if (optionalRace.isEmpty()) {
             throw new RaceDoesNotExist();
         }
@@ -61,7 +60,7 @@ public class RacingService {
 
     @Transactional
     public Race startRace(UUID raceId) {
-        var optionalRace = raceRepository.findByRaceId(raceId);
+        var optionalRace = raceRepository.findByRaceIdLocking(raceId);
         if (optionalRace.isEmpty()) {
             throw new RaceDoesNotExist();
         }
@@ -72,9 +71,9 @@ public class RacingService {
         race.setRaceStatus(Race.RaceStatus.ACTIVE);
         race.setStartedAt(getCurrentDateTime());
         race.setUpdatedAt(getCurrentDateTime());
-        RaceEntity saved = raceRepository.saveAndFlush(race);
+        RaceEntity saved = raceRepository.save(race);
 
-        raceExecutor.runRace(race.getId(), race.getDurationInSeconds());
+        scheduler.runRace(saved.getId(), saved.getStartedAt(), saved.getDurationInSeconds());
         return new Race(saved.getId(), saved.getDurationInSeconds(), saved.getRaceStatus());
     }
 

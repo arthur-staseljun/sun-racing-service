@@ -6,9 +6,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.sun.racing.exception.UnexpectedEngineResponse;
 import reactor.core.publisher.Mono;
 
-import java.rmi.UnexpectedException;
-import java.util.function.Consumer;
-
 @Component
 @RequiredArgsConstructor
 public class Engine {
@@ -27,6 +24,9 @@ public class Engine {
                     throw new UnexpectedEngineResponse();
                 });
         PointsResponse pointsResponse = scoreResult.block();
+        if (pointsResponse == null) {
+            throw new UnexpectedEngineResponse();
+        }
         String points = pointsResponse.points();
         try {
             return Integer.parseInt(points);

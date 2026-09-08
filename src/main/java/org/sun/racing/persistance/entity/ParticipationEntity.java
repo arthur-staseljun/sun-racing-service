@@ -32,9 +32,13 @@ public class ParticipationEntity {
     @Setter
     private Integer score;
 
+    @Setter
+    private boolean freezed;
+
     @Column(name = "created_at")
     private ZonedDateTime createdAt;
 
+    @Setter
     @Column(name = "updated_at")
     private ZonedDateTime updatedAt;
 

@@ -4,6 +4,7 @@ create table participations (
     race_id         uuid,
     participant_id  varchar(255),
     score           integer,
+    freezed         boolean default false,
     created_at      timestamp,
     updated_at      timestamp,
     primary key (id)

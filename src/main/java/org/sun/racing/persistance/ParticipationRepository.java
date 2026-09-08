@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface ParticipationRepository extends JpaRepository<ParticipationEntity, Long> {
+
     Optional<ParticipationEntity> getByRaceIdAndParticipantId(UUID raceId, String participantId);
 
     List<ParticipationEntity> getByRaceId(UUID raceId);

@@ -10,6 +10,7 @@ import org.sun.racing.model.Race;
 import org.sun.racing.model.request.CreateRaceRequest;
 import org.sun.racing.model.response.ParticipationInfoResponse;
 import org.sun.racing.model.response.RaceInfoResponse;
+import org.sun.racing.service.AbilitiesService;
 import org.sun.racing.service.DriveService;
 import org.sun.racing.service.RacingService;
 
@@ -22,6 +23,7 @@ public class RacesController {
 
     private final RacingService racingService;
     private final DriveService driveService;
+    private final AbilitiesService abilitiesService;
 
     @PostMapping
     public Race createRace(@RequestBody CreateRaceRequest request) {
@@ -49,6 +51,12 @@ public class RacesController {
     public ParticipationInfoResponse drive(@PathVariable String raceIdString,
                                            @RequestHeader("X-User-ID") @NotNull String participantId) {
         return driveService.drive(parse(raceIdString), participantId);
+    }
+
+    @PostMapping("/{raceIdString}/abilities/oil-slick")
+    public ParticipationInfoResponse oilSlick(@PathVariable String raceIdString,
+                                              @RequestHeader("X-User-ID") @NotNull String participantId) {
+        return abilitiesService.slickOil(parse(raceIdString), participantId);
     }
 
     private static int parseDuration(String durationString) {

@@ -23,13 +23,13 @@ class RacingServiceTest {
     @Mock
     private ParticipationRepository participationRepository;
     @Mock
-    private RaceExecutor raceExecutor;
+    private Scheduler scheduler;
 
     private RacingService racingService;
 
     @BeforeEach
     void setUp() {
-        racingService = new RacingService(raceRepository, participationRepository, raceExecutor);
+        racingService = new RacingService(raceRepository, participationRepository, scheduler);
     }
 
     @Test

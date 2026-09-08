@@ -36,7 +36,7 @@ public class RaceInfoResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATETIME_FORMAT)
     private ZonedDateTime updatedAt;
 
-    private List<ParticipationEntity> participants;
+    private List<ParticipationInfoResponse> participants;
     public RaceInfoResponse(RaceEntity race, List<ParticipationEntity> participationEntities) {
         this.raceId = race.getId();
         this.durationInSeconds = race.getDurationInSeconds();
@@ -45,6 +45,8 @@ public class RaceInfoResponse {
         this.startedAt = race.getStartedAt();
         this.finishedAt = race.getFinishedAt();
         this.updatedAt = race.getUpdatedAt();
-        this.participants = participationEntities;
+        this.participants = participationEntities.stream().map(entity -> new ParticipationInfoResponse(
+                entity.getRaceId(), entity.getParticipantId(), entity.getScore(), entity.isFreezed(),
+                        entity.getUpdatedAt(), entity.getCreatedAt())).toList();
     }
 }

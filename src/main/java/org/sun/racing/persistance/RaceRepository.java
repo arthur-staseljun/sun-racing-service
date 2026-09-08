@@ -15,5 +15,6 @@ public interface RaceRepository extends JpaRepository<RaceEntity, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_READ)
     @Query("SELECT race FROM RaceEntity race WHERE race.id = :raceId")
-    Optional<RaceEntity> findByRaceId(UUID raceId);
+    Optional<RaceEntity> findByRaceIdLocking(UUID raceId);
+    Optional<RaceEntity> findById(UUID raceId);
 }
