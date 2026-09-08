@@ -9,10 +9,10 @@ spring:
 
     hikari:
       minimumIdle: 2
-      maximumPoolSize: 10
-      idleTimeout: 120_000
-      connectionTimeout: 300_000
-      leakDetectionThreshold: 300_000
+      maximumPoolSize: 1000
+      idleTimeout: 30_000
+      connectionTimeout: 30_000
+      leakDetectionThreshold: 30_000
 
   jpa:
     hibernate:
@@ -25,5 +25,9 @@ engine:
   service-url: https://click-racer-983614458473.europe-north1.run.app/api/fragile-fast/points/earn
   service-fallback-url: https://click-racer-983614458473.europe-north1.run.app/api/stable-slow/points/earn
 
+management:
+  endpoint:
+    metrics:
+      enabled=true
 #logging:
 #  root: debug

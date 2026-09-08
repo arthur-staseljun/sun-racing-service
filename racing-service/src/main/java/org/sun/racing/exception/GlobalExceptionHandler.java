@@ -1,5 +1,6 @@
 package org.sun.racing.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,8 +18,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({ObjectOptimisticLockingFailureException.class})
     public ResponseEntity<ErrorResponse> handleOptimisticLockException(ObjectOptimisticLockingFailureException exception) {
-        return ResponseEntity.internalServerError().body(new ErrorResponse(
-                ErrorClassification.ENGINE_CONNECTION_ERROR.getErrorCode(), exception.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(
+                ErrorClassification.UNABLE_TO_UPDATE_THE_ENTITY.getErrorCode(), ErrorClassification.UNABLE_TO_UPDATE_THE_ENTITY.getErrorMessage()));
     }
 
     @ExceptionHandler(Exception.class)

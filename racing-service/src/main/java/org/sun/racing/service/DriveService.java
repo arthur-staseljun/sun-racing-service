@@ -3,7 +3,6 @@ package org.sun.racing.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.sun.racing.exception.ParticipantIsNotParticipatingInRace;
 import org.sun.racing.exception.RaceDoesNotExist;
 import org.sun.racing.exception.RaceIsNotActive;
@@ -24,10 +23,19 @@ public class DriveService {
 
     private final RaceRepository raceRepository;
     private final ParticipationRepository participationRepository;
-    private final Engine engine;
 
-    @Transactional
-    public ParticipationInfoResponse drive(UUID raceId, String participantId) {
+    public ParticipationInfoResponse updateParticipation(ParticipationEntity participation, int score) {
+        int updatedScore = participation.getScore() + score;
+        participation.setScore(updatedScore);
+        participation.setUpdatedAt(Utils.getCurrentDateTime());
+
+        var saved = participationRepository.save(participation);
+        return new ParticipationInfoResponse(
+                saved.getRaceId(), saved.getParticipantId(), saved.getScore(), saved.isFreezed(),
+                saved.getUpdatedAt(), saved.getCreatedAt());
+    }
+
+    public ParticipationEntity getParticipationEntity(UUID raceId, String participantId) {
         var optionalRace = raceRepository.findById(raceId);
         if (optionalRace.isEmpty()) {
             throw new RaceDoesNotExist();
@@ -41,23 +49,7 @@ public class DriveService {
         if (optionalParticipation.isEmpty()) {
             throw new ParticipantIsNotParticipatingInRace();
         }
-        ParticipationEntity participation = optionalParticipation.get();
-        if (participation.isFreezed()) {
-            log.info("Participation {} is freezed", participation.getId());
-            return new ParticipationInfoResponse(
-                    participation.getRaceId(), participation.getParticipantId(), participation.getScore(), participation.isFreezed(),
-                    participation.getUpdatedAt(), participation.getCreatedAt());
-        }
-
-        int score = engine.getScore();
-        int updatedScore = participation.getScore() + score;
-        participation.setScore(updatedScore);
-        participation.setUpdatedAt(Utils.getCurrentDateTime());
-
-        var saved = participationRepository.save(participation);
-        return new ParticipationInfoResponse(
-                saved.getRaceId(), saved.getParticipantId(), saved.getScore(), saved.isFreezed(),
-                saved.getUpdatedAt(), saved.getCreatedAt());
+        return optionalParticipation.get();
     }
 
 }

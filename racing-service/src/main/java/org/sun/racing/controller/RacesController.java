@@ -10,9 +10,8 @@ import org.sun.racing.model.Race;
 import org.sun.racing.model.request.CreateRaceRequest;
 import org.sun.racing.model.response.ParticipationInfoResponse;
 import org.sun.racing.model.response.RaceInfoResponse;
-import org.sun.racing.service.AbilitiesService;
-import org.sun.racing.service.RacingService;
-import org.sun.racing.service.RetryService;
+import org.sun.racing.persistance.entity.ParticipationEntity;
+import org.sun.racing.service.*;
 
 import java.util.UUID;
 
@@ -24,6 +23,8 @@ public class RacesController {
     private final RacingService racingService;
     private final RetryService retryService;
     private final AbilitiesService abilitiesService;
+    private final DriveService driveService;
+    private final Engine engine;
 
     @PostMapping
     public Race createRace(@RequestBody CreateRaceRequest request) {
@@ -51,7 +52,14 @@ public class RacesController {
     @PostMapping("/{raceIdString}/drive")
     public ParticipationInfoResponse drive(@PathVariable String raceIdString,
                                            @RequestHeader("X-User-ID") @NotNull String participantId) {
-        return retryService.drive(parse(raceIdString), participantId);
+        int score = engine.getScore();
+        ParticipationEntity participation = driveService.getParticipationEntity(parse(raceIdString), participantId);
+        if (participation.isFreezed()) {
+            return new ParticipationInfoResponse(
+                    participation.getRaceId(), participation.getParticipantId(), participation.getScore(), participation.isFreezed(),
+                    participation.getUpdatedAt(), participation.getCreatedAt());
+        }
+        return retryService.drive(participation, score);
     }
 
     @PostMapping("/{raceIdString}/abilities/oil-slick")

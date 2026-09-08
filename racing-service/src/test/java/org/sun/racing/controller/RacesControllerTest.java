@@ -7,6 +7,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.sun.racing.model.Race;
 import org.sun.racing.service.AbilitiesService;
+import org.sun.racing.service.Engine;
 import org.sun.racing.service.RacingService;
 import org.sun.racing.service.RetryService;
 
@@ -29,6 +30,8 @@ class RacesControllerTest {
     private RetryService retryService;
     @MockitoBean
     private AbilitiesService abilitiesService;
+    @MockitoBean
+    private Engine engine;
 
     @Test
     void testCreateRace() throws Exception {

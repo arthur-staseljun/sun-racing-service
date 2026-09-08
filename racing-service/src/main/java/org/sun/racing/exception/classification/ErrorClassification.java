@@ -9,8 +9,6 @@ import java.io.Serializable;
 @RequiredArgsConstructor
 public enum ErrorClassification implements ErrorClassifier, Serializable {
     INTERNAL_SERVER_ERROR("int-err-00", "Internal server error" ),
-    ENGINE_UNEXPECTED_RESPONSE("int-err-01", "Unexpected response from Engine service" ),
-    ENGINE_CONNECTION_ERROR("int-err-02", "Didn't manage to connect to Engine" ),
     RACE_DURATION_PARSE_ERROR("rc-dv-00", "Race duration shall be integer between 1 and 3600 seconds"),
     RACER_ID_PARSE_ERROR("rc-id-00", "Exception while parsing raceId"),
     PARTICIPANT_ALREADY_JOINED("reg-ex-00", "Participant already joined"),
