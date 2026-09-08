@@ -10,5 +10,13 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  competition-service:
+    image: racing-service
+    ports:
+      - "8080:8080"
+    volumes:
+      - racing_data:/var/lib/racing/data
+
 volumes:
   pgdata:
+  racing_data:
