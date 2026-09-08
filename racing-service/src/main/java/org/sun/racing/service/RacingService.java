@@ -15,6 +15,8 @@ import org.sun.racing.persistance.ParticipationRepository;
 import org.sun.racing.persistance.RaceRepository;
 import org.sun.racing.persistance.entity.ParticipationEntity;
 import org.sun.racing.persistance.entity.RaceEntity;
+import org.sun.racing.persistance.RaceConsistencyRepository;
+import org.sun.racing.persistance.entity.RaceConsistency;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +28,7 @@ import static org.sun.racing.util.Utils.getCurrentDateTime;
 public class RacingService {
 
     private final RaceRepository raceRepository;
+    private final RaceConsistencyRepository raceConsistencyRepository;
     private final ParticipationRepository participationRepository;
     private final Scheduler scheduler;
 
@@ -74,6 +77,9 @@ public class RacingService {
         race.setUpdatedAt(getCurrentDateTime());
         RaceEntity saved = raceRepository.save(race);
 
+        var raceResilienceEntity = new RaceConsistency(raceId, race.getStartedAt(),
+                race.getStartedAt().plusSeconds(race.getDurationInSeconds()));
+        raceConsistencyRepository.save(raceResilienceEntity);
         scheduler.runRace(saved.getId(), saved.getStartedAt(), saved.getDurationInSeconds());
         return new Race(saved.getId(), saved.getDurationInSeconds(), saved.getRaceStatus());
     }

@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import org.sun.racing.model.Race;
 import org.sun.racing.persistance.entity.ParticipationEntity;
 import org.sun.racing.persistance.entity.RaceEntity;
+import org.sun.racing.persistance.entity.RaceConsistency;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
-import java.util.concurrent.*;
 
 import static org.sun.racing.util.Utils.getCurrentDateTime;
 
@@ -33,6 +33,8 @@ public class Scheduler {
             raceEntity.setUpdatedAt(getCurrentDateTime());
             raceEntity.setRaceStatus(Race.RaceStatus.FINISHED);
             entityManager.persist(raceEntity);
+            RaceConsistency raceConsistency = entityManager.getReference(RaceConsistency.class, raceEntityId);
+            entityManager.remove(raceConsistency);
             entityManager.getTransaction().commit();
         };
         taskExecutor.schedule(runRace, startedAt.plus(durationInSeconds, ChronoUnit.SECONDS).toInstant());

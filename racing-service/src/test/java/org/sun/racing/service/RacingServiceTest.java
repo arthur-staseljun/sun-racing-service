@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.sun.racing.exception.RaceDurationValidationException;
 import org.sun.racing.model.Race;
 import org.sun.racing.persistance.ParticipationRepository;
+import org.sun.racing.persistance.RaceConsistencyRepository;
 import org.sun.racing.persistance.entity.RaceEntity;
 import org.sun.racing.persistance.RaceRepository;
 
@@ -24,12 +25,14 @@ class RacingServiceTest {
     private ParticipationRepository participationRepository;
     @Mock
     private Scheduler scheduler;
+    @Mock
+    private RaceConsistencyRepository raceConsistencyRepository;
 
     private RacingService racingService;
 
     @BeforeEach
     void setUp() {
-        racingService = new RacingService(raceRepository, participationRepository, scheduler);
+        racingService = new RacingService(raceRepository, raceConsistencyRepository, participationRepository, scheduler);
     }
 
     @Test

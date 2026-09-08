@@ -13,12 +13,22 @@ services:
   competition-service:
     image: racing-service
     environment:
-      POSTGRES_URL: postgres
+      POSTGRES_HOST: postgres
     ports:
       - "8080:8080"
     volumes:
       - racing_data:/var/lib/racing/data
 
+  donkey-service:
+    image: sidewalk-donkey
+    environment:
+      POSTGRES_HOST: postgres
+    ports:
+      - "8081:8081"
+    volumes:
+      - donkey_data:/var/lib/donkey/data
+
 volumes:
   pgdata:
   racing_data:
+  donkey_data:
