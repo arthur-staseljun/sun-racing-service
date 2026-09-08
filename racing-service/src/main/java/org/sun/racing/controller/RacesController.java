@@ -11,8 +11,8 @@ import org.sun.racing.model.request.CreateRaceRequest;
 import org.sun.racing.model.response.ParticipationInfoResponse;
 import org.sun.racing.model.response.RaceInfoResponse;
 import org.sun.racing.service.AbilitiesService;
-import org.sun.racing.service.DriveService;
 import org.sun.racing.service.RacingService;
+import org.sun.racing.service.RetryService;
 
 import java.util.UUID;
 
@@ -22,7 +22,7 @@ import java.util.UUID;
 public class RacesController {
 
     private final RacingService racingService;
-    private final DriveService driveService;
+    private final RetryService retryService;
     private final AbilitiesService abilitiesService;
 
     @PostMapping
@@ -51,7 +51,7 @@ public class RacesController {
     @PostMapping("/{raceIdString}/drive")
     public ParticipationInfoResponse drive(@PathVariable String raceIdString,
                                            @RequestHeader("X-User-ID") @NotNull String participantId) {
-        return driveService.drive(parse(raceIdString), participantId);
+        return retryService.drive(parse(raceIdString), participantId);
     }
 
     @PostMapping("/{raceIdString}/abilities/oil-slick")

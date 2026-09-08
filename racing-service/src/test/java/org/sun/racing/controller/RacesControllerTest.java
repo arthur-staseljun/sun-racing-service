@@ -7,8 +7,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.sun.racing.model.Race;
 import org.sun.racing.service.AbilitiesService;
-import org.sun.racing.service.DriveService;
 import org.sun.racing.service.RacingService;
+import org.sun.racing.service.RetryService;
 
 import java.util.UUID;
 
@@ -26,7 +26,7 @@ class RacesControllerTest {
     @MockitoBean
     private RacingService racingService;
     @MockitoBean
-    private DriveService driveService;
+    private RetryService retryService;
     @MockitoBean
     private AbilitiesService abilitiesService;
 

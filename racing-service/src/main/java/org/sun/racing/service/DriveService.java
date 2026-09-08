@@ -54,7 +54,6 @@ public class DriveService {
         participation.setScore(updatedScore);
         participation.setUpdatedAt(Utils.getCurrentDateTime());
 
-        // TODO: catch OptimisticLockError
         var saved = participationRepository.save(participation);
         return new ParticipationInfoResponse(
                 saved.getRaceId(), saved.getParticipantId(), saved.getScore(), saved.isFreezed(),

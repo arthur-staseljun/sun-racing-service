@@ -12,6 +12,8 @@ services:
 
   competition-service:
     image: racing-service
+    environment:
+      POSTGRES_URL: postgres
     ports:
       - "8080:8080"
     volumes:

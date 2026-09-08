@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: racing-service
+  datasource:
+    password: race
+    driver-class-name: org.postgresql.Driver
+    username: race
+    url: jdbc:postgresql://${POSTGRES_URL}:5432/race_db
+
+    hikari:
+      minimumIdle: 2
+      maximumPoolSize: 10
+      idleTimeout: 120_000
+      connectionTimeout: 300_000
+      leakDetectionThreshold: 300_000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  #    show-sql: 'true'
+  threads:
+    virtual:
+      enabled: 'true'
+engine:
+  service-url: https://click-racer-983614458473.europe-north1.run.app/api/fragile-fast/points/earn
+  service-fallback-url: https://click-racer-983614458473.europe-north1.run.app/api/stable-slow/points/earn
+
+#logging:
+#  root: debug

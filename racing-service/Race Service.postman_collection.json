@@ -1,0 +1,356 @@
+{
+  "info": {
+    "_postman_id": "ff8c3597-c26d-4e48-9edf-e52ba8008fbf",
+    "name": "Race Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "2413705"
+  },
+  "item": [
+    {
+      "name": "http://localhost:8080/races",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "var response = pm.response.json();\nvar raceId = response.id;\n\npm.collectionVariables.set(\"raceId\", raceId);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"durationInSeconds\": 3600\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/races",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "races"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/races/{{raceId}}/join",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-User-ID",
+            "value": "ABC170"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/races/{{raceId}}/join",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "races",
+            "{{raceId}}",
+            "join"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/races/{{raceId}}",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/races/{{raceId}}?detailed=true",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "races",
+            "{{raceId}}"
+          ],
+          "query": [
+            {
+              "key": "detailed",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/races/{{raceId}}/start",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/races/{{raceId}}/start",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "races",
+            "{{raceId}}",
+            "start"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/races/{{raceId}}/drive",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-User-ID",
+            "value": "ABC170"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/races/{{raceId}}/drive",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "races",
+            "{{raceId}}",
+            "drive"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/races/{{raceId}}/drive2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-User-ID",
+            "value": "ABC171"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/races/{{raceId}}/drive",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "races",
+            "{{raceId}}",
+            "drive"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/races/{{raceId}}/drive3",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-User-ID",
+            "value": "ABC172"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/races/{{raceId}}/drive",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "races",
+            "{{raceId}}",
+            "drive"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/races/{{raceId}}/abilities/oil-slick",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-User-ID",
+            "value": "ABC170"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/races/{{raceId}}/abilities/oil-slick",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "races",
+            "{{raceId}}",
+            "abilities",
+            "oil-slick"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:8080/races/{{raceId}}/abilities/engine-hack",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-User-ID",
+            "value": "ABC170"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/races/{{raceId}}/abilities/engine-hack",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "races",
+            "{{raceId}}",
+            "abilities",
+            "engine-hack"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "https://click-racer-983614458473.europe-north1.run.app/api/fragile-fast/points/earn",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://click-racer-983614458473.europe-north1.run.app/api/fragile-fast/points/earn",
+          "protocol": "https",
+          "host": [
+            "click-racer-983614458473",
+            "europe-north1",
+            "run",
+            "app"
+          ],
+          "path": [
+            "api",
+            "fragile-fast",
+            "points",
+            "earn"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "raceId",
+      "value": ""
+    }
+  ]
+}

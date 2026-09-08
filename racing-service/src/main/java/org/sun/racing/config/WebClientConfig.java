@@ -24,10 +24,10 @@ public class WebClientConfig {
     @Bean
     public WebClient defaultWebClient() {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofMillis(5000))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000)
+                .responseTimeout(Duration.ofMillis(60_000))
                 .doOnConnected(connection ->
-                        connection.addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
+                        connection.addHandlerLast(new ReadTimeoutHandler(60_000, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
                 .baseUrl(defaultServiceUrl)
@@ -38,10 +38,10 @@ public class WebClientConfig {
     @Bean
     public WebClient fallbackWebClient() {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofMillis(5000))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000)
+                .responseTimeout(Duration.ofMillis(60_000))
                 .doOnConnected(connection ->
-                        connection.addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
+                        connection.addHandlerLast(new ReadTimeoutHandler(60_000, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
                 .baseUrl(fallbackServiceUrl)

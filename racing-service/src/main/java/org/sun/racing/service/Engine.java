@@ -3,7 +3,6 @@ package org.sun.racing.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.sun.racing.exception.UnexpectedEngineResponse;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -20,12 +19,10 @@ public class Engine {
                 .onErrorResume(exception -> fallbackWebClient.post()
                         .retrieve()
                         .bodyToMono(PointsResponse.class))
-                .doOnError(exception -> {
-                    throw new UnexpectedEngineResponse();
-                });
+                .onErrorResume(exception -> Mono.just(new PointsResponse("0")));
         PointsResponse pointsResponse = scoreResult.block();
         if (pointsResponse == null) {
-            throw new UnexpectedEngineResponse();
+            return 0;
         }
         String points = pointsResponse.points();
         try {
