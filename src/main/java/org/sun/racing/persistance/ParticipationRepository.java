@@ -14,4 +14,6 @@ public interface ParticipationRepository extends JpaRepository<ParticipationEnti
     Optional<ParticipationEntity> getByRaceIdAndParticipantId(UUID raceId, String participantId);
 
     List<ParticipationEntity> getByRaceId(UUID raceId);
+
+    List<ParticipationEntity> getByRaceIdOrderByScoreDesc(UUID raceId);
 }

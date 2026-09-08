@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.sun.racing.model.Race;
 import org.sun.racing.persistance.entity.ParticipationEntity;
 import org.sun.racing.persistance.entity.RaceEntity;
 
@@ -19,7 +18,7 @@ import static org.sun.racing.util.Utils.DATETIME_FORMAT;
 public class RaceInfoResponse {
     private UUID raceId;
     private int durationInSeconds;
-    private Race.RaceStatus raceStatus;
+    private String raceStatus;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATETIME_FORMAT)
     private ZonedDateTime createdAt;
@@ -40,7 +39,7 @@ public class RaceInfoResponse {
     public RaceInfoResponse(RaceEntity race, List<ParticipationEntity> participationEntities) {
         this.raceId = race.getId();
         this.durationInSeconds = race.getDurationInSeconds();
-        this.raceStatus = race.getRaceStatus();
+        this.raceStatus = race.getRaceStatus().name();
         this.createdAt = race.getCreatedAt();
         this.startedAt = race.getStartedAt();
         this.finishedAt = race.getFinishedAt();

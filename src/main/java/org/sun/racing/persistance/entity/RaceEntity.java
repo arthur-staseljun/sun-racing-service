@@ -48,5 +48,6 @@ public class RaceEntity {
         this.durationInSeconds = durationInSeconds;
         this.raceStatus = raceStatus;
         this.createdAt = getCurrentDateTime();
+        this.updatedAt = getCurrentDateTime();
     }
 }

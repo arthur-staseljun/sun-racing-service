@@ -43,8 +43,9 @@ public class RacesController {
     }
 
     @GetMapping("/{raceIdString}")
-    public RaceInfoResponse getRace(@PathVariable String raceIdString) {
-        return racingService.getRaceInfo(parse(raceIdString));
+    public RaceInfoResponse getRace(@PathVariable String raceIdString,
+                                    @RequestParam(required = false) String detailed) {
+        return racingService.getRaceInfo(parse(raceIdString), Boolean.parseBoolean(detailed));
     }
 
     @PostMapping("/{raceIdString}/drive")

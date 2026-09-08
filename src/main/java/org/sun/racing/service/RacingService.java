@@ -7,6 +7,7 @@ import org.sun.racing.exception.ParticipantAlreadyJoinedException;
 import org.sun.racing.exception.RaceDoesNotExist;
 import org.sun.racing.exception.RaceDurationValidationException;
 import org.sun.racing.exception.RaceIsActiveOrFinished;
+import org.sun.racing.model.response.LeaderBoardResponse;
 import org.sun.racing.model.Race;
 import org.sun.racing.model.response.ParticipationInfoResponse;
 import org.sun.racing.model.response.RaceInfoResponse;
@@ -77,13 +78,13 @@ public class RacingService {
         return new Race(saved.getId(), saved.getDurationInSeconds(), saved.getRaceStatus());
     }
 
-    public RaceInfoResponse getRaceInfo(UUID raceId) {
+    public RaceInfoResponse getRaceInfo(UUID raceId, boolean detailed) {
         var optionalRace = raceRepository.findById(raceId);
         if (optionalRace.isEmpty()) {
             throw new RaceDoesNotExist();
         }
         RaceEntity race = optionalRace.get();
-        List<ParticipationEntity> participationEntities = participationRepository.getByRaceId(raceId);
-        return new RaceInfoResponse(race, participationEntities);
+        List<ParticipationEntity> participationEntities = participationRepository.getByRaceIdOrderByScoreDesc(raceId);
+        return detailed ? new RaceInfoResponse(race, participationEntities) : new LeaderBoardResponse(race, participationEntities);
     }
 }

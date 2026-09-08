@@ -13,7 +13,13 @@ public class Race {
     private final int durationInSeconds;
     private final RaceStatus raceStatus;
     public enum RaceStatus {
-        CREATED, ACTIVE, FINISHED
+        CREATED("created"),
+        ACTIVE("active"),
+        FINISHED("finished");
+        private String status;
+        RaceStatus(String staus) {
+            this.status = staus;
+        }
     }
 }
 
