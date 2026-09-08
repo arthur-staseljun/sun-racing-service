@@ -59,6 +59,12 @@ public class RacesController {
         return abilitiesService.slickOil(parse(raceIdString), participantId);
     }
 
+    @PostMapping("/{raceIdString}/abilities/engine-hack")
+    public ParticipationInfoResponse hackEngine(@PathVariable String raceIdString,
+                                                @RequestHeader("X-User-ID") @NotNull String participantId) {
+        return abilitiesService.hackEngine(parse(raceIdString), participantId);
+    }
+
     private static int parseDuration(String durationString) {
         int duration;
         try {
