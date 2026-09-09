@@ -25,9 +25,9 @@ public class WebClientConfig {
     public WebClient defaultWebClient() {
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000)
-                .responseTimeout(Duration.ofMillis(20_000))
+                .responseTimeout(Duration.ofMillis(30_000))
                 .doOnConnected(connection ->
-                        connection.addHandlerLast(new ReadTimeoutHandler(10_000, TimeUnit.MILLISECONDS)));
+                        connection.addHandlerLast(new ReadTimeoutHandler(30_000, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
                 .baseUrl(defaultServiceUrl)

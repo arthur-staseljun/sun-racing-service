@@ -9,13 +9,18 @@ import org.sun.racing.exception.RaceDoesNotExist;
 import org.sun.racing.exception.RaceIsNotActive;
 import org.sun.racing.model.Race;
 import org.sun.racing.model.response.ParticipationInfoResponse;
+import org.sun.racing.persistance.FreezeConsistencyRespository;
 import org.sun.racing.persistance.ParticipationRepository;
 import org.sun.racing.persistance.RaceRepository;
+import org.sun.racing.persistance.entity.FreezeConsistencyEntity;
 import org.sun.racing.persistance.entity.ParticipationEntity;
 import org.sun.racing.persistance.entity.RaceEntity;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -32,7 +37,7 @@ public class AbilitiesService {
 
     private final RaceRepository raceRepository;
     private final ParticipationRepository participationRepository;
-    private final Scheduler scheduler;
+    private final FreezeConsistencyRespository freezeConsistencyRespository;
 
     private Random randomInstance = new Random();
 
@@ -66,7 +71,8 @@ public class AbilitiesService {
     private synchronized ParticipationEntity freeze(UUID raceId, ParticipationEntity initiator,
                                                     int updatedScore, RaceEntity race) {
         initiator.setScore(updatedScore);
-        initiator.setUpdatedAt(getCurrentDateTime());
+        ZonedDateTime now = getCurrentDateTime();
+        initiator.setUpdatedAt(now);
         ParticipationEntity saved = participationRepository.save(initiator);
 
         Set<ParticipationEntity> participationEntities = Set.copyOf(participationRepository.getByRaceId(raceId));
@@ -77,11 +83,26 @@ public class AbilitiesService {
                         .multiply(BigDecimal.valueOf(1000))
                         .setScale(0, RoundingMode.HALF_UP)
                         .longValue();
-                log.info("Freezing participant with id: {} for {} milliseconds", freezedEntity.getId(), freezeDurationInMilliseconds);
+                log.info("Freezing participant with id: {} for {} milliseconds", freezedEntity.getParticipantId(), freezeDurationInMilliseconds);
                 freezedEntity.setFreezed(true);
-                freezedEntity.setUpdatedAt(getCurrentDateTime());
+                freezedEntity.setUpdatedAt(now);
                 participationRepository.save(freezedEntity);
-                scheduler.unfreeze(freezedEntity.getId(), freezedEntity.getUpdatedAt(), freezeDurationInMilliseconds);
+                var freezeConsistencyEntityOptional = freezeConsistencyRespository.findById(freezedEntity.getId());
+                ZonedDateTime updatedShouldBeUnfreezedAt;
+                FreezeConsistencyEntity freezeConsistency;
+                if (freezeConsistencyEntityOptional.isEmpty()) {
+                    updatedShouldBeUnfreezedAt = now.plus(Duration.ofMillis(freezeDurationInMilliseconds));
+                    freezeConsistency = new FreezeConsistencyEntity(freezedEntity.getId(), now, updatedShouldBeUnfreezedAt);
+                    log.info("Creating freezed consitency entity with should_be_unfreezed_at: {}", updatedShouldBeUnfreezedAt);
+                } else {
+                    freezeConsistency =  freezeConsistencyEntityOptional.get();
+                    ZonedDateTime shouldBeUnfreezedAt = freezeConsistency.getShouldBeUnfreezedAt();
+                    updatedShouldBeUnfreezedAt = shouldBeUnfreezedAt.plus(Duration.ofMillis(freezeDurationInMilliseconds));
+                    log.info("Adding {} milliseconds to freezed consitency old value: {}, new value: {}",
+                            freezeDurationInMilliseconds, shouldBeUnfreezedAt, updatedShouldBeUnfreezedAt);
+                }
+                freezeConsistency.setShouldBeUnfreezedAt(updatedShouldBeUnfreezedAt);
+                freezeConsistencyRespository.save(freezeConsistency);
             }
         }
         return saved;
@@ -125,7 +146,7 @@ public class AbilitiesService {
             if (!hackedEntity.getId().equals(initiator.getId())) {
                 int hackedScore = hackedEntity.getScore() - hackPoints;
                 int resultingScore = hackedScore < 0 ? 0 : hackedScore;
-                log.info("Hacking participant with id: {}, it looses {} points, resulting score: {}",
+                log.info("Hacking participant with id: {}, he looses {} points, resulting score: {}",
                         hackedEntity.getId(), hackPoints, resultingScore);
                 hackedEntity.setScore(resultingScore);
                 hackedEntity.setUpdatedAt(getCurrentDateTime());

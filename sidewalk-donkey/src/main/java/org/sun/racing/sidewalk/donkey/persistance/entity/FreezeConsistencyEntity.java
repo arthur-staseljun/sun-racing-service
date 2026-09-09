@@ -9,20 +9,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 @Getter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "race_consistency")
-public class RaceConsistency {
+@Table(name = "freeze_consistency")
+public class FreezeConsistencyEntity {
     @Id
-    private UUID raceId;
+    @Column(name = "participation_id")
+    private Long participationId;
 
-    @Column(name = "started_at")
-    private ZonedDateTime startedAt;
+    @Column(name = "freezed_at")
+    private ZonedDateTime freezedAt;
 
-    @Column(name = "should_be_finished_at")
-    private ZonedDateTime shouldBeFinishedAt;
+    @Column(name = "should_be_unfreezed_at")
+    private ZonedDateTime shouldBeUnfreezedAt;
 }

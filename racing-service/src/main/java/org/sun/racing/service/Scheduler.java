@@ -7,9 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import org.sun.racing.model.Race;
-import org.sun.racing.persistance.entity.ParticipationEntity;
-import org.sun.racing.persistance.entity.RaceEntity;
 import org.sun.racing.persistance.entity.RaceConsistency;
+import org.sun.racing.persistance.entity.RaceEntity;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -38,18 +37,5 @@ public class Scheduler {
             entityManager.getTransaction().commit();
         };
         taskExecutor.schedule(runRace, startedAt.plus(durationInSeconds, ChronoUnit.SECONDS).toInstant());
-    }
-
-    public void unfreeze(Long entityId, ZonedDateTime createdAt, long freezePeriodInMilliseconds) {
-        Runnable unfreeze = () -> {
-            EntityManager entityManager = entityManagerFactory.createEntityManager();
-            entityManager.getTransaction().begin();
-            ParticipationEntity participationEntity = entityManager.getReference(ParticipationEntity.class, entityId);
-            log.info("Unfreezing participation with id: " + participationEntity.getId());
-            participationEntity.setFreezed(false);
-            entityManager.persist(participationEntity);
-            entityManager.getTransaction().commit();
-        };
-        taskExecutor.schedule(unfreeze, createdAt.plus(freezePeriodInMilliseconds, ChronoUnit.MILLIS).toInstant());
     }
 }

@@ -15,8 +15,7 @@ spring:
 
 job:
   race-consistency:
-    enabled: true
-    repeat-millis: 10
+    repeat-millis: 5
 
 #logging:
 #  root: debug
