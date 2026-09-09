@@ -35,6 +35,10 @@ public class ParticipationEntity {
     @Setter
     private boolean freezed;
 
+    @Column(name = "should_be_unfreezed_at")
+    @Setter
+    private ZonedDateTime shouldBeUnfreezedAt;
+
     @Column(name = "created_at")
     private ZonedDateTime createdAt;
 

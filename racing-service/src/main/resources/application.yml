@@ -21,9 +21,14 @@ spring:
   threads:
     virtual:
       enabled: true
+
 engine:
   service-url: https://click-racer-983614458473.europe-north1.run.app/api/fragile-fast/points/earn
   service-fallback-url: https://click-racer-983614458473.europe-north1.run.app/api/stable-slow/points/earn
+
+application:
+  sidewalk:
+    donkey-enabled: true
 
 #management:
 #  endpoint:

@@ -1,17 +1,17 @@
 package org.sun.racing.service;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
-import org.sun.racing.model.Race;
-import org.sun.racing.persistance.entity.RaceConsistency;
-import org.sun.racing.persistance.entity.RaceEntity;
+import org.sun.racing.events.EntityUnfreezeEvent;
+import org.sun.racing.events.RaceFinishEvent;
+import org.sun.racing.persistance.entity.ParticipationEntity;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.sun.racing.util.Utils.getCurrentDateTime;
@@ -21,21 +21,20 @@ import static org.sun.racing.util.Utils.getCurrentDateTime;
 @RequiredArgsConstructor
 public class Scheduler {
     private final ThreadPoolTaskScheduler taskExecutor;
-    private final EntityManagerFactory entityManagerFactory;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public void runRace(UUID raceEntityId, ZonedDateTime startedAt, int durationInSeconds) {
-        Runnable runRace = () -> {
-            EntityManager entityManager = entityManagerFactory.createEntityManager();
-            entityManager.getTransaction().begin();
-            RaceEntity raceEntity = entityManager.getReference(RaceEntity.class, raceEntityId);
-            raceEntity.setFinishedAt(getCurrentDateTime());
-            raceEntity.setUpdatedAt(getCurrentDateTime());
-            raceEntity.setRaceStatus(Race.RaceStatus.FINISHED);
-            entityManager.persist(raceEntity);
-            RaceConsistency raceConsistency = entityManager.getReference(RaceConsistency.class, raceEntityId);
-            entityManager.remove(raceConsistency);
-            entityManager.getTransaction().commit();
-        };
-        taskExecutor.schedule(runRace, startedAt.plus(durationInSeconds, ChronoUnit.SECONDS).toInstant());
+    public void runRace(UUID raceEntityId, int durationInSeconds) {
+        Runnable finishRace = () -> eventPublisher.publishEvent(new RaceFinishEvent(raceEntityId));
+        ZonedDateTime raceFinishDateTime = getCurrentDateTime().plus(Duration.ofSeconds(durationInSeconds));
+        log.info("Scheduling race {} finish event at {}", raceEntityId, raceFinishDateTime);
+        taskExecutor.schedule(finishRace, raceFinishDateTime.toInstant());
+    }
+
+    public void unfreeze(ParticipationEntity freezedEntity, long freezeDurationInMilliseconds) {
+        Runnable unfreeze = () -> eventPublisher.publishEvent(new EntityUnfreezeEvent(freezedEntity.getId()));
+        ZonedDateTime unfreezeDateTime = getCurrentDateTime().plus(Duration.ofMillis(freezeDurationInMilliseconds));
+        log.info("Scheduling unfreezing participationId {} at {}", freezedEntity.getId(), unfreezeDateTime);
+        taskExecutor.schedule(unfreeze, unfreezeDateTime.toInstant());
+
     }
 }

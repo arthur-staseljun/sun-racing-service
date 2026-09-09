@@ -1,6 +1,7 @@
 package org.sun.racing.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.sun.racing.exception.ParticipantAlreadyJoinedException;
@@ -21,6 +22,7 @@ import org.sun.racing.persistance.entity.RaceConsistency;
 import java.util.List;
 import java.util.UUID;
 
+import static java.lang.Boolean.TRUE;
 import static org.sun.racing.util.Utils.getCurrentDateTime;
 
 @Service
@@ -31,6 +33,9 @@ public class RacingService {
     private final RaceConsistencyRepository raceConsistencyRepository;
     private final ParticipationRepository participationRepository;
     private final Scheduler scheduler;
+
+    @Value("${application.sidewalk.donkey-enabled:true}")
+    private Boolean isSideDonkeyEnabled;
 
     public Race createNewRace(int duration) {
         if (duration < 1 || duration > 3600) {
@@ -77,10 +82,12 @@ public class RacingService {
         race.setUpdatedAt(getCurrentDateTime());
         RaceEntity saved = raceRepository.save(race);
 
-        var raceResilienceEntity = new RaceConsistency(raceId, race.getStartedAt(),
-                race.getStartedAt().plusSeconds(race.getDurationInSeconds()));
-        raceConsistencyRepository.save(raceResilienceEntity);
-        scheduler.runRace(saved.getId(), saved.getStartedAt(), saved.getDurationInSeconds());
+        if (TRUE.equals(isSideDonkeyEnabled)) {
+            var raceResilienceEntity = new RaceConsistency(raceId, race.getStartedAt(),
+                    race.getStartedAt().plusSeconds(race.getDurationInSeconds()));
+            raceConsistencyRepository.save(raceResilienceEntity);
+        }
+        scheduler.runRace(saved.getId(),saved.getDurationInSeconds());
         return new Race(saved.getId(), saved.getDurationInSeconds(), saved.getRaceStatus());
     }
 

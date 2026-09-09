@@ -76,6 +76,7 @@ public class Scheduler {
                 }
                 ParticipationEntity unfreezedPartitipation = unfreezedPartitipationOptional.get();
                 unfreezedPartitipation.setFreezed(false);
+                unfreezedPartitipation.setShouldBeUnfreezedAt(null);
                 unfreezedPartitipation.setUpdatedAt(now);
                 participationRepository.save(unfreezedPartitipation);
                 log.info("Participation {} has been unfreezed", unfreezeParticipantId);

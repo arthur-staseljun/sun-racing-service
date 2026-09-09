@@ -2,6 +2,7 @@ package org.sun.racing.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.sun.racing.exception.ParticipantHasFewPoints;
 import org.sun.racing.exception.ParticipantIsNotParticipatingInRace;
@@ -20,11 +21,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.lang.Boolean.TRUE;
 import static org.sun.racing.util.Utils.getCurrentDateTime;
 
 @Slf4j
@@ -38,6 +39,10 @@ public class AbilitiesService {
     private final RaceRepository raceRepository;
     private final ParticipationRepository participationRepository;
     private final FreezeConsistencyRespository freezeConsistencyRespository;
+    private final Scheduler scheduler;
+
+    @Value("${application.sidewalk.donkey-enabled:true}")
+    private Boolean isSideDonkeyEnabled;
 
     private Random randomInstance = new Random();
 
@@ -85,24 +90,29 @@ public class AbilitiesService {
                         .longValue();
                 log.info("Freezing participant with id: {} for {} milliseconds", freezedEntity.getParticipantId(), freezeDurationInMilliseconds);
                 freezedEntity.setFreezed(true);
+                freezedEntity.setShouldBeUnfreezedAt(now.plus(Duration.ofMillis(freezeDurationInMilliseconds)));
                 freezedEntity.setUpdatedAt(now);
                 participationRepository.save(freezedEntity);
-                var freezeConsistencyEntityOptional = freezeConsistencyRespository.findById(freezedEntity.getId());
-                ZonedDateTime updatedShouldBeUnfreezedAt;
-                FreezeConsistencyEntity freezeConsistency;
-                if (freezeConsistencyEntityOptional.isEmpty()) {
-                    updatedShouldBeUnfreezedAt = now.plus(Duration.ofMillis(freezeDurationInMilliseconds));
-                    freezeConsistency = new FreezeConsistencyEntity(freezedEntity.getId(), now, updatedShouldBeUnfreezedAt);
-                    log.info("Creating freezed consitency entity with should_be_unfreezed_at: {}", updatedShouldBeUnfreezedAt);
-                } else {
-                    freezeConsistency =  freezeConsistencyEntityOptional.get();
-                    ZonedDateTime shouldBeUnfreezedAt = freezeConsistency.getShouldBeUnfreezedAt();
-                    updatedShouldBeUnfreezedAt = shouldBeUnfreezedAt.plus(Duration.ofMillis(freezeDurationInMilliseconds));
-                    log.info("Adding {} milliseconds to freezed consitency old value: {}, new value: {}",
-                            freezeDurationInMilliseconds, shouldBeUnfreezedAt, updatedShouldBeUnfreezedAt);
+                scheduler.unfreeze(freezedEntity, freezeDurationInMilliseconds);
+
+                if (TRUE.equals(isSideDonkeyEnabled)) {
+                    var freezeConsistencyEntityOptional = freezeConsistencyRespository.findById(freezedEntity.getId());
+                    ZonedDateTime updatedShouldBeUnfreezedAt;
+                    FreezeConsistencyEntity freezeConsistency;
+                    if (freezeConsistencyEntityOptional.isEmpty()) {
+                        updatedShouldBeUnfreezedAt = now.plus(Duration.ofMillis(freezeDurationInMilliseconds));
+                        freezeConsistency = new FreezeConsistencyEntity(freezedEntity.getId(), now, updatedShouldBeUnfreezedAt);
+                        log.info("Creating freezed consitency entity with should_be_unfreezed_at: {}", updatedShouldBeUnfreezedAt);
+                    } else {
+                        freezeConsistency = freezeConsistencyEntityOptional.get();
+                        ZonedDateTime shouldBeUnfreezedAt = freezeConsistency.getShouldBeUnfreezedAt();
+                        updatedShouldBeUnfreezedAt = shouldBeUnfreezedAt.plus(Duration.ofMillis(freezeDurationInMilliseconds));
+                        log.info("Adding {} milliseconds to freezed consitency old value: {}, new value: {}",
+                                freezeDurationInMilliseconds, shouldBeUnfreezedAt, updatedShouldBeUnfreezedAt);
+                    }
+                    freezeConsistency.setShouldBeUnfreezedAt(updatedShouldBeUnfreezedAt);
+                    freezeConsistencyRespository.save(freezeConsistency);
                 }
-                freezeConsistency.setShouldBeUnfreezedAt(updatedShouldBeUnfreezedAt);
-                freezeConsistencyRespository.save(freezeConsistency);
             }
         }
         return saved;
