@@ -31,6 +31,7 @@ public class RaceApplicationEventListener {
     private final ReportingService reportingService;
 
     @EventListener
+    @Transactional
     public void unfreezeEntity(EntityUnfreezeEvent event) {
         Long participationEntityId = event.getParticipationEntityId();
         ParticipationEntity participationEntity = participationRepository.findById(participationEntityId)
@@ -43,7 +44,7 @@ public class RaceApplicationEventListener {
             return;
         }
         log.info("Unfreezing participation: {}", participationEntityId);
-        participationRepository.unfreeze(participationEntity.getId());
+        participationRepository.unfreeze(participationEntity.getId(), getCurrentDateTime());
     }
 
     @EventListener

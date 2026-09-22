@@ -12,6 +12,7 @@ import org.sun.racing.persistance.ParticipationRepository;
 import org.sun.racing.persistance.RaceRepository;
 import org.sun.racing.persistance.entity.ParticipationEntity;
 import org.sun.racing.persistance.entity.RaceEntity;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,6 +47,7 @@ public class ReportingService {
                         .retrieve()
                         .toBodilessEntity())
                 .doOnError(error -> log.error("Error calling reporting services", error))
+                .onErrorResume(error -> Mono.empty())
                 .block();
     }
 }

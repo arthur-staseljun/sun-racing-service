@@ -17,6 +17,8 @@ import org.sun.racing.persistance.entity.RaceEntity;
 import java.util.UUID;
 import java.util.function.IntSupplier;
 
+import static org.sun.racing.util.Utils.getCurrentDateTime;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,7 +35,7 @@ public class DriveService {
         if (participation.isFreezed()) {
             return new ParticipationInfoResponse(participation);
         }
-        participationRepository.updateScore(participation.getId(), scoreSupplier.getAsInt());
+        participationRepository.updateScore(participation.getId(), scoreSupplier.getAsInt(), getCurrentDateTime());
         return new ParticipationInfoResponse(participationRepository.findById(participation.getId()).orElseThrow());
     }
 

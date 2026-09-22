@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.sun.racing.persistance.entity.ParticipationEntity;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -24,40 +25,42 @@ public interface ParticipationRepository extends JpaRepository<ParticipationEnti
 
     @Modifying(clearAutomatically = true)
     @Query("""
-              update ParticipationEntity p set updatedAt = CURRENT_TIMESTAMP, score = 
+              update ParticipationEntity p set updatedAt = :now, score = 
                 case 
                     when score + :delta > 0 then score + :delta
                     else 0 
                 end
               where p.id = :participationId
             """)
-    int updateScore(@Param("participationId") long participationId, @Param("delta") int delta);
+    int updateScore(@Param("participationId") long participationId,
+                    @Param("delta") int delta,
+                    @Param("now") ZonedDateTime now);
 
     List<ParticipationEntity> getByRaceIdOrderByScoreDesc(UUID raceId);
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
               update participations p 
-                set freezed = true, updated_at = CURRENT_TIMESTAMP, should_be_unfreezed_at = case
-                    when p.should_be_unfreezed_at IS NULL then CURRENT_TIMESTAMP + (:freezeDurationInMilliseconds * interval '1 Millisecond')
+                set freezed = true, updated_at = :now, should_be_unfreezed_at = case
+                    when p.should_be_unfreezed_at IS NULL then CAST (:now AS timestamp) + (:freezeDurationInMilliseconds * interval '1 Millisecond')
                     else p.should_be_unfreezed_at + (:freezeDurationInMilliseconds * interval '1 Millisecond')
                 end
               where p.id = :participationId
            """, nativeQuery = true)
-    int freezeOrExtend(long participationId, long freezeDurationInMilliseconds);
+    int freezeOrExtend(long participationId, long freezeDurationInMilliseconds, ZonedDateTime now);
 
 
     @Modifying(clearAutomatically = true)
     @Query("""
                 update ParticipationEntity p 
-                    set freezed = false, updatedAt = CURRENT_TIMESTAMP, shouldBeUnfreezedAt = NULL
-                where p.id = :participationId and p.freezed = true and p.shouldBeUnfreezedAt <= CURRENT_TIMESTAMP
+                    set freezed = false, updatedAt = :now, shouldBeUnfreezedAt = NULL
+                where p.id = :participationId and p.freezed = true and p.shouldBeUnfreezedAt <= :now
            """)
-    int unfreeze(long participationId);
+    int unfreeze(long participationId, ZonedDateTime now);
 
     List<ParticipationEntity> getTop3ByRaceIdOrderByScoreDesc(UUID raceId);
 
     @Query("select entity from ParticipationEntity entity where entity.freezed = TRUE " +
-            "and entity.shouldBeUnfreezedAt <= CURRENT_TIMESTAMP")
-    List<ParticipationEntity> findAllUnfreezeOverdue();
+            "and entity.shouldBeUnfreezedAt <= :now")
+    List<ParticipationEntity> findAllUnfreezeOverdue(@Param("now")ZonedDateTime now);
 }

@@ -21,6 +21,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.sun.racing.util.Utils.getCurrentDateTime;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -47,11 +49,11 @@ public class AbilitiesService {
                 if (updatedScore < 0) {
                     throw new ParticipantHasFewPoints();
                 }
-                participationRepository.updateScore(participation.getId(), -OIL_SLICK_COST);
+                participationRepository.updateScore(participation.getId(), -OIL_SLICK_COST, getCurrentDateTime());
             } else {
                 long freezeDurationInMilliseconds = getFreezeDurationInMilliseconds(race);
                 log.info("Freezing participant with id: {} for {} milliseconds", participation.getParticipantId(), freezeDurationInMilliseconds);
-                participationRepository.freezeOrExtend(participation.getId(), freezeDurationInMilliseconds);
+                participationRepository.freezeOrExtend(participation.getId(), freezeDurationInMilliseconds, getCurrentDateTime());
                 ParticipationEntity refreshed = participationRepository.getByRaceIdAndParticipantId(race.getId(), participation.getParticipantId()).orElseThrow();
                 scheduler.unfreeze(refreshed);
             }
@@ -81,11 +83,11 @@ public class AbilitiesService {
                 if (updatedScore < 0) {
                     throw new ParticipantHasFewPoints();
                 }
-                participationRepository.updateScore(participation.getId(), -ENGINE_HACK_COST);
+                participationRepository.updateScore(participation.getId(), -ENGINE_HACK_COST, getCurrentDateTime());
             } else {
                 log.info("Hacking participant with id: {}, he looses {} points",
                         participation.getId(), hackPoints);
-                participationRepository.updateScore(participation.getId(), -hackPoints);
+                participationRepository.updateScore(participation.getId(), -hackPoints, getCurrentDateTime());
             }
         }
         return new ParticipationInfoResponse(participationRepository.findById(initiator.getId()).orElseThrow());

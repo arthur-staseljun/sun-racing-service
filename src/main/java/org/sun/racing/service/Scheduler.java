@@ -31,7 +31,7 @@ public class Scheduler {
 
     public void runRace(UUID raceEntityId, ZonedDateTime shouldBeFinishedAt) {
         Runnable finishRace = () -> eventPublisher.publishEvent(new RaceFinishEvent(raceEntityId));
-        log.info("Scheduling race {} finish event at {}", raceEntityId, getCurrentDateTime());
+        log.info("Scheduling race {} finish event at {}", raceEntityId, shouldBeFinishedAt);
         taskExecutor.schedule(finishRace, shouldBeFinishedAt.toInstant());
     }
 
@@ -42,15 +42,15 @@ public class Scheduler {
         taskExecutor.schedule(unfreeze, unfreezeDateTime.toInstant());
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedDelay = 5000)
     public void finishOverdueRaces() {
-        List<RaceEntity> overdueRaces = raceRepository.findAllOverdue();
+        List<RaceEntity> overdueRaces = raceRepository.findAllOverdue(getCurrentDateTime());
         overdueRaces.forEach(race -> eventPublisher.publishEvent(new RaceFinishEvent(race.getId())));
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedDelay = 5000)
     public void unfreezeOverdueEntities() {
-        List<ParticipationEntity> overdueRaces = participationRepository.findAllUnfreezeOverdue();
+        List<ParticipationEntity> overdueRaces = participationRepository.findAllUnfreezeOverdue(getCurrentDateTime());
         overdueRaces.forEach(participationEntity ->
                 eventPublisher.publishEvent(new EntityUnfreezeEvent(participationEntity.getId())));
     }

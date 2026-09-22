@@ -12,6 +12,7 @@ public class SchedulerConfig {
     @Bean
     public ThreadPoolTaskScheduler taskExecutor() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(10);
         scheduler.setThreadFactory(Thread.ofVirtual().name("scheduler-1", 1).factory());
         scheduler.initialize();
         return scheduler;
