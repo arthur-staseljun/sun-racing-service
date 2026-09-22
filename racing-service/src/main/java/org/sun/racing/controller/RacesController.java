@@ -10,8 +10,10 @@ import org.sun.racing.model.Race;
 import org.sun.racing.model.request.CreateRaceRequest;
 import org.sun.racing.model.response.ParticipationInfoResponse;
 import org.sun.racing.model.response.RaceInfoResponse;
-import org.sun.racing.persistance.entity.ParticipationEntity;
-import org.sun.racing.service.*;
+import org.sun.racing.service.AbilitiesService;
+import org.sun.racing.service.DriveService;
+import org.sun.racing.service.Engine;
+import org.sun.racing.service.RacingService;
 
 import java.util.UUID;
 
@@ -21,7 +23,6 @@ import java.util.UUID;
 public class RacesController {
 
     private final RacingService racingService;
-    private final RetryService retryService;
     private final AbilitiesService abilitiesService;
     private final DriveService driveService;
     private final Engine engine;
@@ -46,20 +47,13 @@ public class RacesController {
     @GetMapping("/{raceIdString}")
     public RaceInfoResponse getRace(@PathVariable String raceIdString,
                                     @RequestParam(required = false) String detailed) {
-        return racingService.getRaceInfo(parse(raceIdString), Boolean.parseBoolean(detailed));
+        return racingService.getActiveRaceInfo(parse(raceIdString), Boolean.parseBoolean(detailed));
     }
 
     @PostMapping("/{raceIdString}/drive")
     public ParticipationInfoResponse drive(@PathVariable String raceIdString,
                                            @RequestHeader("X-User-ID") @NotNull String participantId) {
-        int score = engine.getScore();
-        ParticipationEntity participation = driveService.getParticipationEntity(parse(raceIdString), participantId);
-        if (participation.isFreezed()) {
-            return new ParticipationInfoResponse(
-                    participation.getRaceId(), participation.getParticipantId(), participation.getScore(), participation.isFreezed(),
-                    participation.getUpdatedAt(), participation.getCreatedAt());
-        }
-        return retryService.drive(participation, score);
+        return driveService.drive(parse(raceIdString), participantId, engine::getScore);
     }
 
     @PostMapping("/{raceIdString}/abilities/oil-slick")

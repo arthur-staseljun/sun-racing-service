@@ -1,6 +1,5 @@
 create table participations (
     id                      bigserial,
-    version                 bigint default 0,
     race_id                 uuid,
     participant_id          varchar(255),
     score                   integer,

@@ -3,6 +3,7 @@ package org.sun.racing.model.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
+import org.sun.racing.persistance.entity.ParticipationEntity;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -42,5 +43,14 @@ public class ParticipationInfoResponse {
         this.isFreezed = isFreezed;
         this.updatedAt = updatedAt;
         this.createdAt = createdAt;
+    }
+
+    public ParticipationInfoResponse(ParticipationEntity participation) {
+        this.raceId = participation.getRaceId();
+        this.participantId = participation.getParticipantId();
+        this.score = participation.getScore();
+        this.isFreezed = participation.isFreezed();
+        this.updatedAt = participation.getUpdatedAt();
+        this.createdAt = participation.getCreatedAt();
     }
 }

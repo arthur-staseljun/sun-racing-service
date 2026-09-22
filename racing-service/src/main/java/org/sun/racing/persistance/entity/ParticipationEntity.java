@@ -20,9 +20,6 @@ public class ParticipationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Version
-    private Long version;
-
     @Column(name = "race_id")
     private UUID raceId;
 

@@ -16,8 +16,10 @@ public enum ErrorClassification implements ErrorClassifier, Serializable {
     RACE_IS_ACTIVE_OR_ALREADY_FINISHED("reg-ex-02", "Race is active or already finished" ),
     RACE_IS_NOT_ACTIVE("com-ex-00", "Race is not active"),
     PARTICIPANT_NOT_PARTICIPATING_IN_RACE("com-ex-01", "Participant is not participating in the Race"),
-    PARTICIPANT_HAS_TOO_FEW_POINTS("com-ex-02", "Participant has too few points"),
-    UNABLE_TO_UPDATE_THE_ENTITY("com-ex-03", "Was not able to update the entity, please retry after some time");
+    PARTICIPANT_HAS_TOO_FEW_POINTS("com-ex-03", "Participant has too few points"),
+    UNABLE_TO_UPDATE_THE_ENTITY("com-ex-04", "Was not able to update the entity, please retry after some time"),
+    RACE_ALREADY_JOINED_EXCEPTION("com-ex-05", "Participant already joined the race");
+
     private static final long serialVersionUID = -6849794470754667710L;
 
     private final String errorCode;

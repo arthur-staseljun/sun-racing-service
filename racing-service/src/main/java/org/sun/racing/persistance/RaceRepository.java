@@ -13,8 +13,7 @@ import java.util.UUID;
 @Repository
 public interface RaceRepository extends JpaRepository<RaceEntity, UUID> {
 
-    @Lock(LockModeType.PESSIMISTIC_READ)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT race FROM RaceEntity race WHERE race.id = :raceId")
     Optional<RaceEntity> findByRaceIdLocking(UUID raceId);
-    Optional<RaceEntity> findById(UUID raceId);
 }

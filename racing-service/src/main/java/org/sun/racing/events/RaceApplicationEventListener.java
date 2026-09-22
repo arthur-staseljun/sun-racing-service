@@ -3,11 +3,16 @@ package org.sun.racing.events;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.sun.racing.model.Race;
 import org.sun.racing.persistance.ParticipationRepository;
 import org.sun.racing.persistance.RaceRepository;
+import org.sun.racing.persistance.RacesJoinedRepository;
 import org.sun.racing.persistance.entity.ParticipationEntity;
 import org.sun.racing.persistance.entity.RaceEntity;
+import org.sun.racing.service.ReportingService;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -22,16 +27,13 @@ public class RaceApplicationEventListener {
 
     private final ParticipationRepository participationRepository;
     private final RaceRepository raceRepository;
+    private final ReportingService reportingService;
 
     @EventListener
     public void unfreezeEntity(EntityUnfreezeEvent event) {
         Long participationEntityId = event.getParticipationEntityId();
-        Optional<ParticipationEntity> participationEntityOptional = participationRepository.findById(participationEntityId);
-        if (participationEntityOptional.isEmpty()) {
-            log.error("No participation entity found by race {} with id {}", participationEntityId);
-            return;
-        }
-        ParticipationEntity participationEntity = participationEntityOptional.get();
+        ParticipationEntity participationEntity = participationRepository.findById(participationEntityId)
+                .orElseThrow(() -> new IllegalArgumentException("Participation " + participationEntityId + " was not found"));
 
         ZonedDateTime now = getCurrentDateTime();
         if (participationEntity.isFreezed() && participationEntity.getShouldBeUnfreezedAt().isAfter(now)) {
@@ -40,26 +42,32 @@ public class RaceApplicationEventListener {
             return;
         }
         log.info("Unfreezing participation: {}", participationEntityId);
-        participationEntity.setFreezed(false);
-        participationEntity.setShouldBeUnfreezedAt(null);
-        participationEntity.setUpdatedAt(now);
-        participationRepository.save(participationEntity);
+        participationRepository.unfreeze(participationEntity.getId());
     }
 
     @EventListener
+    @Order(1)
+    @Transactional
     public void finishRace(RaceFinishEvent event) {
-        UUID raceEntityId = event.getRaceEntityId();
-        Optional<RaceEntity> raceEntityOptional = raceRepository.findById(raceEntityId);
-        if (raceEntityOptional.isEmpty()) {
-            log.error("No race entity found with id {}", raceEntityId);
+        UUID raceId = event.getRaceEntityId();
+        RaceEntity raceEntity = raceRepository.findByRaceIdLocking(raceId)
+                .orElseThrow(() -> new IllegalArgumentException("No race entity found with id: " + raceId));
+        if (raceEntity.getRaceStatus() != Race.RaceStatus.ACTIVE) {
+            log.info("Race {} has already been finished", raceId);
             return;
         }
-        RaceEntity raceEntity = raceEntityOptional.get();
-
         ZonedDateTime now = getCurrentDateTime();
         raceEntity.setFinishedAt(now);
         raceEntity.setUpdatedAt(now);
+        raceEntity.setRaceStatus(Race.RaceStatus.FINISHED);
         raceRepository.save(raceEntity);
-        log.info("Finished race {} at {}", raceEntityId, now);
+        log.info("Finished race {} at {}", raceId, now);
+    }
+
+    @EventListener
+    @Order(2)
+    public void reportWinners(RaceFinishEvent event) {
+        UUID raceId = event.getRaceEntityId();
+        reportingService.reportWinners(raceId);
     }
 }

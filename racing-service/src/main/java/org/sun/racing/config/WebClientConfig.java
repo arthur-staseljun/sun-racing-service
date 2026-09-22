@@ -16,35 +16,47 @@ import java.util.concurrent.TimeUnit;
 public class WebClientConfig {
 
     @Value("${engine.service-url}")
-    private String defaultServiceUrl;
+    private String engineServiceUrl;
 
     @Value("${engine.service-fallback-url}")
-    private String fallbackServiceUrl;
+    private String engineFallbackServiceUrl;
+
+    @Value("${reporting.service-url}")
+    private String reportingServiceUrl;
+
+    @Value("${reporting.service-fallback-url}")
+    private String reportingFallbackServiceUrl;
 
     @Bean
     public WebClient defaultWebClient() {
-        HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000)
-                .responseTimeout(Duration.ofMillis(30_000))
-                .doOnConnected(connection ->
-                        connection.addHandlerLast(new ReadTimeoutHandler(30_000, TimeUnit.MILLISECONDS)));
-
-        return WebClient.builder()
-                .baseUrl(defaultServiceUrl)
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .build();
+        return buildWebClient(engineServiceUrl, 1_000, 2_000, 2_000);
     }
 
     @Bean
     public WebClient fallbackWebClient() {
+        return buildWebClient(engineFallbackServiceUrl, 1_000, 3_000, 3_000);
+    }
+
+    @Bean
+    public WebClient defaultReportingWebClient() {
+        return buildWebClient(reportingServiceUrl, 10_000, 20_000, 20_000);
+    }
+
+    @Bean
+    public WebClient fallbackReportingWebClient() {
+        return buildWebClient(reportingFallbackServiceUrl, 10_000, 30_000, 30_000);
+    }
+
+    private  WebClient buildWebClient(String url, int connectionTimeout,
+                                      long readTimeout, long responseTimeout) {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000)
-                .responseTimeout(Duration.ofMillis(20_000))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout)
+                .responseTimeout(Duration.ofMillis(responseTimeout))
                 .doOnConnected(connection ->
-                        connection.addHandlerLast(new ReadTimeoutHandler(20_000, TimeUnit.MILLISECONDS)));
+                        connection.addHandlerLast(new ReadTimeoutHandler(readTimeout, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
-                .baseUrl(fallbackServiceUrl)
+                .baseUrl(url)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }

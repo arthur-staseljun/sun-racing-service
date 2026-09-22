@@ -33,6 +33,10 @@ public class RaceEntity {
     private ZonedDateTime createdAt;
 
     @Setter
+    @Column(name = "should_be_finished_at")
+    private ZonedDateTime shouldBeFinishedAt;
+
+    @Setter
     @Column(name = "started_at")
     private ZonedDateTime startedAt;
 
@@ -44,10 +48,11 @@ public class RaceEntity {
     @Column(name = "updated_at")
     private ZonedDateTime updatedAt;
 
-    public RaceEntity(int durationInSeconds, Race.RaceStatus raceStatus) {
+    public RaceEntity(int durationInSeconds) {
+        ZonedDateTime now = getCurrentDateTime();
         this.durationInSeconds = durationInSeconds;
-        this.raceStatus = raceStatus;
-        this.createdAt = getCurrentDateTime();
-        this.updatedAt = getCurrentDateTime();
+        this.raceStatus = Race.RaceStatus.CREATED;
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 }

@@ -30,19 +30,11 @@ public class LeaderBoardResponse extends RaceInfoResponse {
 
     private List<LeaderBoardParticipant> leaderboard;
 
-    private List<LeaderBoardParticipant> winners;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATETIME_FORMAT)
     private ZonedDateTime createdAt;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATETIME_FORMAT)
     private ZonedDateTime updatedAt;
-
-    @JsonIgnore
-    private ZonedDateTime finishedAt;
-    @JsonIgnore
-    private List<ParticipationInfoResponse> participants;
-
     public LeaderBoardResponse(RaceEntity race, List<ParticipationEntity> participationEntities) {
         this.raceId = race.getId();
         this.durationInSeconds = race.getDurationInSeconds();
@@ -51,15 +43,12 @@ public class LeaderBoardResponse extends RaceInfoResponse {
         this.startedAt = race.getStartedAt();
         this.updatedAt = race.getUpdatedAt();
 
-        boolean isFinished = race.getRaceStatus().equals(Race.RaceStatus.FINISHED);
         List<LeaderBoardParticipant> board = IntStream.range(0, participationEntities.size())
                 .mapToObj(i -> {
                     ParticipationEntity entity = participationEntities.get(i);
-                    return isFinished ? new WinnerBoardParticipant(i + 1, entity.getParticipantId(), entity.getScore())
-                            : new LeaderBoardParticipant(i + 1, entity.getParticipantId(), entity.getScore());
+                    return new LeaderBoardParticipant(i + 1, entity.getParticipantId(), entity.getScore());
                 }).toList();
-        if (isFinished) this.winners = board;
-        else this.leaderboard = board;
+        this.leaderboard = board;
     }
 
     @Getter
@@ -69,15 +58,5 @@ public class LeaderBoardResponse extends RaceInfoResponse {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         final String racerId;
         final int score;
-    }
-
-    @Getter
-    private class WinnerBoardParticipant extends LeaderBoardParticipant {
-        final String userId;
-
-        public WinnerBoardParticipant(int rank, String userId, int score) {
-            super(rank, null, score);
-            this.userId = userId;
-        }
-    }
 }
+    }
