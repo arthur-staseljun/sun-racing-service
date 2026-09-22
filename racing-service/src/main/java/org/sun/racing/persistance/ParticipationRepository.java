@@ -56,4 +56,8 @@ public interface ParticipationRepository extends JpaRepository<ParticipationEnti
     int unfreeze(long participationId);
 
     List<ParticipationEntity> getTop3ByRaceIdOrderByScoreDesc(UUID raceId);
+
+    @Query("select entity from ParticipationEntity entity where entity.freezed = TRUE " +
+            "and entity.shouldBeUnfreezedAt <= CURRENT_TIMESTAMP")
+    List<ParticipationEntity> findAllUnfreezeOverdue();
 }

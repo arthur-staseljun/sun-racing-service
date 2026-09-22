@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.sun.racing.persistance.entity.RaceEntity;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,6 +15,11 @@ import java.util.UUID;
 public interface RaceRepository extends JpaRepository<RaceEntity, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT race FROM RaceEntity race WHERE race.id = :raceId")
+    @Query("select race from RaceEntity race where race.id = :raceId")
     Optional<RaceEntity> findByRaceIdLocking(UUID raceId);
+
+
+    @Query("select race from RaceEntity race where race.raceStatus=org.sun.racing.model.Race$RaceStatus.ACTIVE and " +
+            "race.shouldBeFinishedAt <= CURRENT_TIMESTAMP")
+    List<RaceEntity> findAllOverdue();
 }
