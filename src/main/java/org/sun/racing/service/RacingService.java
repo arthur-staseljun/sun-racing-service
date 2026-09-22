@@ -1,6 +1,7 @@
 package org.sun.racing.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 import static org.sun.racing.util.Utils.getCurrentDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RacingService {
@@ -76,6 +78,22 @@ public class RacingService {
         scheduler.runRace(saved.getId(), saved.getShouldBeFinishedAt());
         racesJoinedRepository.deleteAllByRaceId(raceId);
         return new Race(saved.getId(), saved.getDurationInSeconds(), saved.getRaceStatus());
+    }
+
+    @Transactional
+    public boolean finishRace(UUID raceId) {
+        RaceEntity raceEntity = raceRepository.findByRaceIdLocking(raceId)
+                .orElseThrow(() -> new IllegalArgumentException("No race entity found with id: " + raceId));
+        if (raceEntity.getRaceStatus() != Race.RaceStatus.ACTIVE) {
+            log.info("Race {} has already been finished", raceId);
+            return false;
+        }
+        ZonedDateTime now = getCurrentDateTime();
+        raceEntity.setFinishedAt(now);
+        raceEntity.setUpdatedAt(now);
+        raceEntity.setRaceStatus(Race.RaceStatus.FINISHED);
+        raceRepository.save(raceEntity);
+        return true;
     }
 
     public RaceInfoResponse getActiveRaceInfo(UUID raceId, boolean detailed) {

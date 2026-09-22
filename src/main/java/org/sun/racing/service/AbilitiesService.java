@@ -40,7 +40,7 @@ public class AbilitiesService {
         ParticipationEntity initiator = participationRepository.getByRaceIdAndParticipantId(race.getId(), participantId)
                 .orElseThrow(ParticipantIsNotParticipatingInRace::new);
 
-        Set<ParticipationEntity> participationEntities = participationRepository.getAllByRaceIdLockingOrderByIdAsc(raceId);
+        Set<ParticipationEntity> participationEntities = participationRepository.getAllByRaceIdOrderByIdAsc(raceId);
         for (ParticipationEntity participation : participationEntities) {
             if (participation.getId().equals(initiator.getId())) {
                 int updatedScore = participation.getScore() - OIL_SLICK_COST;
@@ -74,7 +74,7 @@ public class AbilitiesService {
                 .orElseThrow(ParticipantIsNotParticipatingInRace::new);
 
         int hackPoints = randomInstance.nextInt(MAX_ENGINE_HACK_LOOSE_POINTS) + 1;
-        Set<ParticipationEntity> participationEntities = participationRepository.getAllByRaceIdLockingOrderByIdAsc(raceId);
+        Set<ParticipationEntity> participationEntities = participationRepository.getAllByRaceIdOrderByIdAsc(raceId);
         for (ParticipationEntity participation : participationEntities) {
             if (participation.getId().equals(initiator.getId())) {
                 int updatedScore = participation.getScore() - ENGINE_HACK_COST;

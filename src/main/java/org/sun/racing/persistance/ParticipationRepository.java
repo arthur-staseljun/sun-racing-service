@@ -20,7 +20,7 @@ public interface ParticipationRepository extends JpaRepository<ParticipationEnti
     Optional<ParticipationEntity> getByRaceIdAndParticipantId(UUID raceId, String participantId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Set<ParticipationEntity> getAllByRaceIdLockingOrderByIdAsc(UUID raceId);
+    Set<ParticipationEntity> getAllByRaceIdOrderByIdAsc(UUID raceId);
 
     @Modifying(clearAutomatically = true)
     @Query("""
@@ -36,14 +36,14 @@ public interface ParticipationRepository extends JpaRepository<ParticipationEnti
     List<ParticipationEntity> getByRaceIdOrderByScoreDesc(UUID raceId);
 
     @Modifying(clearAutomatically = true)
-    @Query("""
-              update ParticipationEntity p 
-                set freezed = true, updatedAt = CURRENT_TIMESTAMP, shouldBeUnfreezedAt = case
-                    when p.shouldBeUnfreezedAt IS NULL then timestampadd(MILLISECOND, :freezeDurationInMilliseconds, CURRENT_TIMESTAMP)
-                    else timestampadd(MILLISECOND, :freezeDurationInMilliseconds, p.shouldBeUnfreezedAt)
+    @Query(value = """
+              update participations p 
+                set freezed = true, updated_at = CURRENT_TIMESTAMP, should_be_unfreezed_at = case
+                    when p.should_be_unfreezed_at IS NULL then CURRENT_TIMESTAMP + (:freezeDurationInMilliseconds * interval '1 Millisecond')
+                    else p.should_be_unfreezed_at + (:freezeDurationInMilliseconds * interval '1 Millisecond')
                 end
               where p.id = :participationId
-           """)
+           """, nativeQuery = true)
     int freezeOrExtend(long participationId, long freezeDurationInMilliseconds);
 
 

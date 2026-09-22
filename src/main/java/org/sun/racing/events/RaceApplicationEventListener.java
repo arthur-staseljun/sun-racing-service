@@ -12,6 +12,7 @@ import org.sun.racing.persistance.ParticipationRepository;
 import org.sun.racing.persistance.RaceRepository;
 import org.sun.racing.persistance.entity.ParticipationEntity;
 import org.sun.racing.persistance.entity.RaceEntity;
+import org.sun.racing.service.RacingService;
 import org.sun.racing.service.ReportingService;
 
 import java.time.ZonedDateTime;
@@ -26,7 +27,7 @@ import static org.sun.racing.util.Utils.getCurrentDateTime;
 public class RaceApplicationEventListener {
 
     private final ParticipationRepository participationRepository;
-    private final RaceRepository raceRepository;
+    private final RacingService racingService;
     private final ReportingService reportingService;
 
     @EventListener
@@ -46,28 +47,13 @@ public class RaceApplicationEventListener {
     }
 
     @EventListener
-    @Order(1)
-    @Transactional
     public void finishRace(RaceFinishEvent event) {
         UUID raceId = event.getRaceEntityId();
-        RaceEntity raceEntity = raceRepository.findByRaceIdLocking(raceId)
-                .orElseThrow(() -> new IllegalArgumentException("No race entity found with id: " + raceId));
-        if (raceEntity.getRaceStatus() != Race.RaceStatus.ACTIVE) {
-            log.info("Race {} has already been finished", raceId);
+        boolean isFinishedNow = racingService.finishRace(raceId);
+        if (isFinishedNow) {
+            reportingService.reportWinners(raceId);
             return;
         }
-        ZonedDateTime now = getCurrentDateTime();
-        raceEntity.setFinishedAt(now);
-        raceEntity.setUpdatedAt(now);
-        raceEntity.setRaceStatus(Race.RaceStatus.FINISHED);
-        raceRepository.save(raceEntity);
-        log.info("Finished race {} at {}", raceId, now);
-    }
-
-    @EventListener
-    @Order(2)
-    public void reportWinners(RaceFinishEvent event) {
-        UUID raceId = event.getRaceEntityId();
-        reportingService.reportWinners(raceId);
+        log.info("Race {} already finished, skipping reporting",  raceId);
     }
 }
